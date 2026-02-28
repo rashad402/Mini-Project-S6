@@ -151,7 +151,31 @@ export default function SignIn({ onLogin }) {
               </button>
             </form>
 
-
+            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+              <button
+                type="button"
+                className="ff-btn ff-btn-secondary w-100"
+                onClick={() => {
+                  setEmail('instructor@example.com');
+                  setPassword('password123');
+                  // Give React a small tick to update state before submitting the form using a synthetic event
+                  setTimeout(() => {
+                    const form = document.querySelector('form');
+                    if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                  }, 100);
+                }}
+                style={{
+                  background: 'rgba(99, 102, 241, 0.1)',
+                  border: '1px solid rgba(99, 102, 241, 0.3)',
+                  padding: '0.6rem',
+                  fontSize: '0.9rem',
+                  color: 'var(--ff-primary-light)'
+                }}
+              >
+                <i className="bi bi-lightning-charge-fill me-2"></i>
+                1-Click Login: Demo Instructor
+              </button>
+            </div>
           </>
         ) : (
           <>
