@@ -155,14 +155,29 @@ export default function SignIn({ onLogin }) {
               <button
                 type="button"
                 className="ff-btn ff-btn-secondary w-100"
-                onClick={() => {
+                onClick={async () => {
                   setEmail('instructor@example.com');
                   setPassword('password123');
-                  // Give React a small tick to update state before submitting the form using a synthetic event
-                  setTimeout(() => {
-                    const form = document.querySelector('form');
-                    if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                  }, 100);
+                  setError('');
+                  setIsLoading(true);
+                  try {
+                    const response = await api.post('/api/auth/login', {
+                      email: 'instructor@example.com',
+                      password: 'password123',
+                    });
+                    if (response.data.user) {
+                      onLogin(response.data.user);
+                      if (response.data.user.role === 'Instructor') {
+                        navigate('/instructor-dashboard');
+                      } else {
+                        navigate('/student-dashboard');
+                      }
+                    }
+                  } catch (err) {
+                    setError(err.response?.data?.message || 'Login failed.');
+                  } finally {
+                    setIsLoading(false);
+                  }
                 }}
                 style={{
                   background: 'rgba(99, 102, 241, 0.1)',
