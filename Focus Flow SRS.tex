@@ -1,0 +1,208 @@
+\documentclass{scrreprt}
+\usepackage{listings}
+\usepackage{underscore}
+\usepackage{graphicx}
+\usepackage[bookmarks=true]{hyperref}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\hypersetup{
+    bookmarks=false,    % show bookmarks bar?
+    pdftitle={Software Requirement Specification},    % title
+    pdfauthor={Group 3},                     % author
+    pdfsubject={Focus Flow SRS},                        % subject of the document
+    pdfkeywords={MERN, AI Proctoring, LMS}, % list of keywords
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue,       % color of internal links
+    citecolor=black,       % color of links to bibliography
+    filecolor=black,        % color of file links
+    urlcolor=purple,        % color of external links
+    linktoc=page            % only page is linked
+}%
+\def\myversion{1.0 }
+\date{}
+%\title{%
+
+%}
+\usepackage{hyperref}
+\begin{document}
+
+\begin{flushright}
+    \rule{16cm}{5pt}\vskip1cm
+    \begin{bfseries}
+        \Huge{SOFTWARE REQUIREMENTS\\ SPECIFICATION}\\
+        \vspace{1.5cm}
+        for\\
+        \vspace{1.5cm}
+        FOCUS FLOW\\
+        \vspace{1.5cm}
+        \LARGE{Version \myversion}\\
+        \vspace{1.5cm}
+        Prepared by : 1. Abhiram K (KNR23CS005)\\
+        2. Mohammed Shahmel ANP (KNR23CS041)\\
+        3. Muhammad Rashad Hashim (KNR23CS043)\\
+        4. Najih V (KNR23CS046)\\
+        \vspace{1.5cm}
+        Submitted to : Dr. Bindu PV\\
+        \vspace{1.5cm}
+        \today\\
+    \end{bfseries}
+\end{flushright}
+
+\tableofcontents
+
+\chapter{Introduction}
+
+\section{Purpose}
+Existing online examination and learning management systems (LMS) suffer from a significant lack of integrity and flexibility. Traditional platforms often fail to provide adequate safeguards against academic dishonesty during remote assessments. Furthermore, current systems lack integrated support for technical assessments, forcing institutions to use separate platforms for MCQs and practical coding tests. "Focus Flow" is the solution. It is a robust, unified web application that combines a secure exam environment with lightweight, client-side AI proctoring and an integrated coding sandbox.
+
+\section{Intended Audience and Reading Suggestions}
+This SRS is for developers, project guides, educational stakeholders, and testers. Further discussion will provide all the internal, external, functional, and non-functional information about "Focus Flow".
+
+\section{Project Scope}
+"Focus Flow" creates a space for Instructors, Students, and Educational Institutions to maintain academic standards during remote learning.
+
+The application bridges the gap between assessment integrity and user experience. It allows specific roles:
+\begin{itemize}
+    \item \textbf{Instructors:} Can create dynamic exams, manage question banks, and review flagged events from proctored sessions.
+    \item \textbf{Students:} Can take exams in a secure environment, write code in an integrated sandbox, and view performance analytics.
+\end{itemize}
+The core scope includes User Registration, Exam Builder Dashboard, Integrated Coding Sandbox, AI-Based Proctoring, and Student Analytics.
+
+\begin{figure}[htbp]
+  \centering
+  \framebox{\parbox{0.8\textwidth}{\centering
+    \vspace{2cm}
+    \textbf{Focus Flow Work-flow Diagram} \\
+    \small\textit{Diagram showing flow between Student, AI Proctor, and Instructor.}
+    \vspace{2cm}
+  }}
+  \caption{Entire work-flow}
+  \label{fig:FocusFlowWorkFlow}
+\end{figure}
+
+Figure 1.1 represents the high-level workflow where the Student interacts with the Exam Interface, monitored locally by the AI module, while the Instructor manages the content and reviews results.
+
+\chapter{Overall Description}
+
+\section{Product Perspective}
+"Focus Flow" is a replacement for fragmented tools like Google Forms combined with separate coding compilers. Unlike enterprise services that are high-cost and privacy-invasive, this project uses a tailored MERN-stack application with client-side ML to ensure privacy and efficiency.
+
+\section{User Classes and Characteristics}
+"Focus Flow" has basically 3 types of stakeholders.
+\begin{itemize}
+  \item Students
+    \begin{itemize}
+        \item Primary users who take exams and review learning progress.
+    \end{itemize}
+  \item Instructors/Faculty
+    \begin{itemize}
+        \item Responsible for designing assessments and reviewing integrity reports.
+    \end{itemize}
+  \item Educational Institutions
+     \begin{itemize}
+        \item Organizations deploying the system.
+    \end{itemize}
+\end{itemize}
+
+\section{Product Functions}
+"Focus Flow" integrates several key functions to ensure a seamless assessment process.
+
+\begin{figure}[htbp]
+  \centering
+  \framebox{\parbox{0.8\textwidth}{\centering
+    \vspace{2cm}
+    \textbf{Data Flow Diagram Placeholder} \\
+    \small\textit{DFD showing data movement between Frontend, Backend, and MongoDB.}
+    \vspace{2cm}
+  }}
+  \caption{Data Flow Diagram}
+  \label{fig:DFD}
+\end{figure}
+
+Before using the main functions, users must be authenticated securely using Sessions and Cookies (Passport.js).
+
+\textbf{Key Functions include:}
+\begin{itemize}
+    \item \textbf{Exam Builder:} Instructors create dynamic exams with support for rich text and images. Includes bulk-upload features.
+    \item \textbf{Coding Sandbox:} A built-in Monaco Editor allowing students to write/compile code within the browser with syntax highlighting.
+    \item \textbf{AI Proctoring:} A client-side ML module (MediaPipe) monitors behavior (looking away, leaving tab) and generates "Flag Events".
+    \item \textbf{Analytics:} Post-exam visualization and comparative graphs for students.
+\end{itemize}
+
+\section{Operating Environment}
+The website will operate in any modern web browser (Chrome, Edge, Firefox) on various Operating Systems (Windows, Mac, Linux). It requires a webcam for the proctoring features.
+
+\section{Design}
+The application follows a responsive web design philosophy.
+
+\textbf{Student Activities:}
+\begin{itemize}
+    \item Login/Register
+    \item Attempt Exam (MCQ + Coding)
+    \item View Results/Analytics
+\end{itemize}
+\textbf{Instructor Activities:}
+\begin{itemize}
+    \item Create/Manage Exams
+    \item Manage Question Banks
+    \item Review Results and Proctoring Logs
+\end{itemize}
+
+\chapter{System Features}
+"Focus Flow" is an AI-Proctored Exam \& Learning Management System. The main art of this product is to ensure exam integrity without invading privacy.
+
+\section{Description and Priority}
+The features with priority up to down -
+\begin{enumerate}
+    \item \textbf{User Authentication}: Secure login is foundational (Passport.js).
+    \item \textbf{Exam Delivery}: The ability to serve questions and accept answers.
+    \item \textbf{AI Proctoring}: The core differentiator; monitoring gaze and tab activity.
+    \item \textbf{Coding Sandbox}: Essential for technical assessments (Monaco Editor).
+    \item \textbf{Result Generation}: Automating grading and feedback.
+\end{enumerate}
+
+\section{Functional Requirements}
+The "Focus Flow" website is being built on the MERN stack.
+
+\textbf{Front-End:}
+\begin{itemize}
+    \item React.js (Dynamic UI, State management)
+    \item Bootstrap 5 (Responsive Design)
+    \item MediaPipe (Client-side Machine Learning for proctoring)
+\end{itemize}
+\textbf{Back-End:}
+\begin{itemize}
+    \item Node.js (Runtime environment)
+    \item Express.js (RESTful API, Routing)
+\end{itemize}
+\textbf{Database:}
+\begin{itemize}
+    \item MongoDB Atlas (NoSQL database for flexible documents)
+\end{itemize}
+
+\chapter{Other Nonfunctional Requirements}
+
+\section{Performance Requirements}
+"Focus Flow" is built as a responsive web application to ensure fast load times and a seamless user experience. The AI model runs client-side to reduce server bandwidth requirements and latency.
+
+\section{Security Requirements}
+\begin{itemize}
+    \item \textbf{Privacy-First Proctoring:} Video feeds are processed locally on the client and never sent to a server. Only "Flag Events" are stored.
+    \item \textbf{Authentication:} Secure session management using Passport.js.
+    \item \textbf{Data Integrity:} Secure storage of exam papers and submission logs.
+\end{itemize}
+
+\section{Software Quality Attributes}
+\begin{itemize}
+    \item \textbf{Reliability:} The system must handle high concurrency during exam times.
+    \item \textbf{Usability:} An intuitive interface for both students and instructors.
+    \item \textbf{Maintainability:} Modular code structure using MERN stack best practices.
+\end{itemize}
+
+\section{Business Rules}
+"Focus Flow" aims to digitize the examination process while maintaining the sanctity of assessments. It reduces paper usage and logistical overhead associated with physical examinations.
+
+\chapter{Other Requirements}
+The project requires continuous testing of the AI module to ensure it does not produce false positives during proctoring. The system also requires a functional webcam on the client device.
+
+\end{document}

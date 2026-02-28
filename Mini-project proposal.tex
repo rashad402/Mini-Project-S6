@@ -1,0 +1,182 @@
+\documentclass[14pt]{article}
+\usepackage[left=2cm, right=2cm, top=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{tabto}
+\begin{document}
+
+\begin{center}
+\large{\textbf{Government College of Engineering Kannur\\}}
+\large{\textbf{Department of Computer Science and Engineering\\}}
+\large{\textbf{CSD334: Mini-Project\\}}
+\end{center}
+
+\begin{center}
+\small{\textbf{\underline{ Project Proposal}\\}}
+\end{center}
+
+\begin{table}[ht!]
+\begin{center}
+\begin{tabular}{|cccc|}
+\hline
+\multicolumn{4}{|c|}{\textbf{Proposal Prepared By}}                        \\ \hline
+\multicolumn{1}{|c|}{Sl No.} & \multicolumn{1}{c|}{KTU Reg No.} & \multicolumn{1}{c|}{Name of Student}              & Signature of Student \\ \hline
+\multicolumn{1}{|c|}{1}      & \multicolumn{1}{c|}{KNR23CS005}   & \multicolumn{1}{c|}{Abhiram K} &           \\ \hline
+\multicolumn{1}{|c|}{2} & \multicolumn{1}{c|}{KNR23CS041} & \multicolumn{1}{c|}{Mohammed Shahmel A N P} &  \\ \hline
+\multicolumn{1}{|c|}{3} & \multicolumn{1}{c|}{KNR23CS043} & \multicolumn{1}{c|}{Muhammad Rashad Hashim} &  \\ \hline
+\multicolumn{1}{|c|}{4} & \multicolumn{1}{c|}{KNR23CS046} & \multicolumn{1}{c|}{Najih V} &  \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{enumerate}
+\item Project Title : \textbf{FocusFlow: AI-Proctored Exam \& Learning Management System}
+\item Problem Statement \\
+\tabto{.5cm}Existing online examination and learning management systems (LMS) suffer from a significant lack of integrity and flexibility. Traditional platforms often fail to provide adequate safeguards against academic dishonesty during remote assessments, relying heavily on intrusive, high-bandwidth human proctoring or disparate third-party tools. Furthermore, current systems lack integrated support for technical assessments, forcing institutions to use separate platforms for multiple-choice questions (MCQs) and practical coding tests. \\
+\tabto{.5cm} Our project aims to bridge this gap by developing a robust, unified web application that combines a secure exam environment with lightweight, client-side AI proctoring and an integrated coding sandbox.
+
+\item Solution approach \\
+\tabto{.5cm}Our proposed solution is a feature-rich, single-page web application designed to maintain exam integrity while providing a modern interface for both students and instructors. Below are the key features and functionalities.
+\begin{enumerate}
+\item \textbf{User Registration and Role-Based Access}
+\begin{itemize}
+\item Secure authentication using Sessions and Cookies (Passport.js).
+\item Distinct roles for Students (exam taking) and Instructors (exam creation).
+\end{itemize}
+\item \textbf{Exam Builder Dashboard}
+\begin{itemize}
+\item Instructors can create dynamic exams with support for rich text and images.
+\item A bulk-upload feature allows for efficient management of large question banks.
+\end{itemize}
+\item \textbf{Integrated Coding Sandbox}
+\begin{itemize}
+\item A built-in code editor (Monaco Editor) allows students to write and compile code within the browser.
+\item Supports real-time syntax highlighting and output generation for technical assessments.
+\end{itemize}
+\item \textbf{AI-Based Proctoring}
+\begin{itemize}
+\item A client-side ML module monitors user behavior (e.g., looking away, leaving the tab) via webcam.
+\item Generates "Flag Events" to notify instructors of suspicious activity without storing video streams.
+\end{itemize}
+\item \textbf{Student Analytics}
+\begin{itemize}
+\item Post-exam visualization provides students with performance insights.
+\item Comparative graphs display individual scores against class averages.
+\end{itemize}
+\item \textbf{Database Component}
+\begin{itemize}
+\item A centralized NoSQL database stores user profiles, exam papers, question banks, and submission logs.
+\item Efficiently handles hierarchical data structures like nested questions and code submissions.
+\end{itemize}
+\end{enumerate}
+
+\item Does any other solution already exist for the stated problem? If yes give details.
+\begin{itemize}
+\item Yes, there are existing solutions for online assessment, but they face distinct limitations.
+\begin{enumerate}
+\item Generic Form Builders (e.g., Google Forms)
+\begin{itemize}
+\item Limitations
+\begin{itemize}
+\item Lack of proctoring, no integrated coding environment, and limited security features suitable for formal grading.
+\end{itemize}
+\end{itemize}
+\item Enterprise Proctoring Services
+\begin{itemize}
+\item Limitations
+\begin{itemize}
+\item Extremely high cost, privacy concerns regarding data storage, and heavy bandwidth requirements for live video streaming.
+\end{itemize}
+\end{itemize}
+\end{enumerate}
+A tailored MERN-stack application can address these cost and privacy issues effectively.
+\end{itemize}
+
+\item In what way is your proposed solution better than the existing solution(s)?\\
+\tabto{.5cm}Our proposed solution offers several strategic advantages:
+\begin{enumerate}
+\item \textbf{Unified Ecosystem}
+\begin{itemize}
+\item Unlike fragmented tools where coding happens in one tab and submission in another, Focus Flow integrates MCQs and Coding in a single interface.
+\end{itemize}
+\item \textbf{Privacy-First Proctoring}
+\begin{itemize}
+\item By running the ML model (MediaPipe) on the client side, we ensure that video feeds are processed locally and never sent to a server, addressing major privacy concerns.
+\end{itemize}
+\item \textbf{Accessibility \& Performance}
+\begin{itemize}
+\item Built as a Single Page Application (SPA), it ensures fast load times and a responsive user experience across devices.
+\end{itemize}
+\item \textbf{Detailed Analytics}
+\begin{itemize}
+\item Provides granular insights into student strengths and weaknesses, going beyond simple score reporting.
+\end{itemize}
+\end{enumerate}
+
+\item List out the stakeholders of the proposed project.
+\begin{enumerate}
+\item \textbf{Students}
+\begin{itemize}
+\item The primary users who take exams and review their learning progress.
+\end{itemize}
+\item \textbf{Instructors/Faculty}
+\begin{itemize}
+\item Responsible for designing assessments, managing question banks, and reviewing integrity reports.
+\end{itemize}
+\item \textbf{Educational Institutions}
+\begin{itemize}
+\item The organizations deploying the system to maintain academic standards during remote learning.
+\end{itemize}
+\end{enumerate}
+
+\item What will be the impact of this project work on society directly or indirectly?\\
+\tabto{.5cm}The impact of a secure and integrated learning platform is multifaceted.
+\begin{enumerate}
+\item \textbf{Direct Impact}
+\begin{itemize}
+\item \textbf{Academic Integrity}: Ensures fair assessment by deterring malpractice through intelligent monitoring.
+\item \textbf{Skill Development}: The coding sandbox encourages practical programming practice rather than rote memorization.
+\item \textbf{Efficiency}: Automates grading and result generation, saving valuable faculty time.
+\end{itemize}
+\item \textbf{Indirect Impact}
+\begin{itemize}
+\item \textbf{Digital Literacy}: Familiarizes students with modern, computer-based testing environments used in the industry.
+\item \textbf{Resource Conservation}: Reduces paper usage and logistical overhead associated with physical examinations.
+\end{itemize}
+\end{enumerate}
+
+\item What technologies do you plan to use for the front-end and back-end?
+\begin{enumerate}
+\item \textbf{Front-end (Client-side)} :
+\begin{itemize}
+\item \textbf{React.js}: A library for building dynamic user interfaces. It manages the complex state of the exam timer and interactive question components.
+\item \textbf{Bootstrap 5}: A CSS framework used to ensure a responsive, mobile-first design and consistent layout using the grid system.
+\end{itemize}
+\item \textbf{Back-end (Server-side)} :
+\begin{itemize}
+\item \textbf{Node.js}: The runtime environment enabling JavaScript execution on the server, handling high-concurrency requests efficiently.
+\item \textbf{Express.js}: A framework for building the RESTful API, managing routes, and handling middleware for authentication (Passport.js).
+\end{itemize}
+\item \textbf{Database} :
+\begin{itemize}
+\item \textbf{MongoDB Atlas}: A cloud-based NoSQL database used to store flexible documents for Exams, Users, and Results. It aligns perfectly with the JSON data structure used in the application.
+\end{itemize}
+\item \textbf{Machine Learning (Client-side)} :
+\begin{itemize}
+\item \textbf{MediaPipe}: A lightweight, pre-trained framework utilized for real-time, privacy-preserving face detection and gaze tracking. It runs efficiently in the browser, eliminating the need to train or deploy complex TensorFlow models manually.
+\end{itemize}
+\tabto{.5cm} Together, these technologies form the MERN stack, augmented by lightweight client-side AI, providing a comprehensive solution for modern web-based assessments.
+\end{enumerate}
+
+\end{enumerate}
+\begin{table}[ht!]
+\begin{center}
+\begin{tabular}{|cll|}
+\hline
+\multicolumn{3}{|c|}{\textbf{Proposal Approved By}}                                                                   \\ \hline
+\multicolumn{1}{|c|}{Name of Guide} & \multicolumn{1}{c|}{Signature of Guide} & \multicolumn{1}{c|}{Date of Approval} \\ \hline
+\multicolumn{1}{|l|}{Dr. Bindu P V}              & \multicolumn{1}{l|}{}                   &                                       \\ \hline
+\end{tabular}
+\end{center}
+\end{table}
+\end{document}
