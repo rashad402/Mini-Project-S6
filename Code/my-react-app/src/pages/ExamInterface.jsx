@@ -156,7 +156,7 @@ export default function ExamInterface({ user }) {
                 let lastObjTimestamp = 0;
 
                 const detectionLoop = () => {
-                    if (isTerminated) return;
+                    if (isTerminated || submittingRef.current) return;
 
                     if (videoRef.current && videoRef.current.readyState >= 2 && detectorRef.current) {
                         const now = Date.now();
@@ -215,7 +215,7 @@ export default function ExamInterface({ user }) {
                         }
                     }
 
-                    if (!isTerminated) {
+                    if (!isTerminated && !submittingRef.current) {
                         loopId = setTimeout(detectionLoop, 300);
                     }
                 };
@@ -228,7 +228,20 @@ export default function ExamInterface({ user }) {
         };
 
         if (exam) {
-            initProctoring();
+            // IMPORTANT: Request camera FIRST (before fullscreen)
+            // so the permission dialog doesn't exit fullscreen
+            const setupExam = async () => {
+                await initProctoring();
+
+                // Only enter fullscreen AFTER camera permission is granted
+                const el = document.documentElement;
+                if (el.requestFullscreen) {
+                    el.requestFullscreen().catch(() => {
+                        console.warn('Fullscreen request denied — skipping enforcement');
+                    });
+                }
+            };
+            setupExam();
 
             // Enter fullscreen mode
             let hasEnteredFullscreen = false;
@@ -240,20 +253,13 @@ export default function ExamInterface({ user }) {
                 } else if (hasEnteredFullscreen && !isTerminated && !submittingRef.current) {
                     // Fullscreen was exited after being active — terminate
                     isTerminated = true;
+                    submittingRef.current = true;
                     reportFlag('FullscreenExit', 'Student exited fullscreen mode — exam terminated');
                     alert('The test has been terminated because you exited fullscreen mode.');
                     forceSubmitExam();
                 }
             };
             document.addEventListener('fullscreenchange', handleFullscreenChange);
-
-            // Request fullscreen
-            const el = document.documentElement;
-            if (el.requestFullscreen) {
-                el.requestFullscreen().catch(() => {
-                    console.warn('Fullscreen request denied — skipping enforcement');
-                });
-            }
 
             // Tab Switching Detection (visibility API)
             const handleVisibilityChange = () => {
