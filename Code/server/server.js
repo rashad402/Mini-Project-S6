@@ -26,6 +26,9 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
+// Trust the reverse proxy (Render) so secure cookies can be sent over HTTP
+app.set('trust proxy', 1);
+
 // Session Configuration
 app.use(session({
     secret: process.env.SESSION_SECRET || 'fallback_secret_key_change_in_production',

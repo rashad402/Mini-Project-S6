@@ -14,6 +14,8 @@ export default function ExamInterface({ user }) {
     const [isRunning, setIsRunning] = useState(false);
     const [timeLeft, setTimeLeft] = useState(null); // in seconds
     const timeLeftRef = useRef(null);
+    const timerIdRef = useRef(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // Proctoring states
     const videoRef = useRef(null);
@@ -64,6 +66,8 @@ export default function ExamInterface({ user }) {
                 timeLeftRef.current = next;
                 if (next <= 0) {
                     clearInterval(timerId);
+                    timerIdRef.current = null;
+                    submittingRef.current = true; // Guard before any alert
                     alert('⏰ Time is up! Your exam is being auto-submitted.');
                     timeUpSubmit();
                     return 0;
@@ -71,8 +75,9 @@ export default function ExamInterface({ user }) {
                 return next;
             });
         }, 1000);
+        timerIdRef.current = timerId;
 
-        return () => clearInterval(timerId);
+        return () => { clearInterval(timerId); timerIdRef.current = null; };
     }, [exam]); // only start once exam is loaded
 
     const formatTime = (seconds) => {
@@ -97,6 +102,7 @@ export default function ExamInterface({ user }) {
 
             if (newCount > 3) {
                 isTerminated = true;
+                submittingRef.current = true; // Guard before alert
                 alert("The test has been terminated due to proctoring violation");
                 forceSubmitExam();
             }
@@ -251,7 +257,7 @@ export default function ExamInterface({ user }) {
 
             // Tab Switching Detection (visibility API)
             const handleVisibilityChange = () => {
-                if (document.hidden && !isTerminated) {
+                if (document.hidden && !isTerminated && !submittingRef.current) {
                     handleViolation('TabSwitched', 'User switched tabs or minimized browser');
                 }
             };
@@ -259,7 +265,7 @@ export default function ExamInterface({ user }) {
 
             // Window blur detection (catches Alt+Tab, clicking outside)
             const handleWindowBlur = () => {
-                if (!isTerminated) {
+                if (!isTerminated && !submittingRef.current) {
                     handleViolation('TabSwitched', 'Window lost focus — possible tab switch or Alt+Tab');
                 }
             };
@@ -330,10 +336,20 @@ export default function ExamInterface({ user }) {
     };
 
     const submitData = async (answersData, terminated = false) => {
+        // Double-submit guard
+        if (submitData._inProgress) return;
+        submitData._inProgress = true;
+
         const formattedAnswers = Object.keys(answersData).map(key => ({
             questionId: exam.questions[key]._id,
             answer: answersData[key]
         }));
+
+        // Clear the timer so it doesn't fire after we leave
+        if (timerIdRef.current) {
+            clearInterval(timerIdRef.current);
+            timerIdRef.current = null;
+        }
 
         // Stop webcam before navigating
         if (streamRef.current) {
@@ -362,16 +378,19 @@ export default function ExamInterface({ user }) {
         await submitData(answersRef.current, false);
     };
 
-    const submitExam = async () => {
+    const submitExam = () => {
+        // Show in-page confirm modal instead of window.confirm (which exits fullscreen)
+        setShowConfirmModal(true);
+    };
+
+    const confirmSubmit = async () => {
+        setShowConfirmModal(false);
         submittingRef.current = true;
-        if (!window.confirm("Are you sure you want to submit?")) {
-            submittingRef.current = false;
-            // Re-enter fullscreen since confirm dialog may have exited it
-            const el = document.documentElement;
-            if (!document.fullscreenElement && el.requestFullscreen) el.requestFullscreen().catch(() => { });
-            return;
-        }
         await submitData(answersRef.current, false);
+    };
+
+    const cancelSubmit = () => {
+        setShowConfirmModal(false);
     };
 
     if (!exam) return <div className="ff-spinner"></div>;
@@ -380,6 +399,34 @@ export default function ExamInterface({ user }) {
 
     return (
         <div className="container-fluid py-3" style={{ minHeight: '100vh', background: 'var(--ff-bg)' }}>
+            {/* In-page Submit Confirmation Modal */}
+            {showConfirmModal && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999
+                }}>
+                    <div style={{
+                        background: 'var(--ff-bg-card)', border: '1px solid var(--ff-border)',
+                        borderRadius: 'var(--ff-radius-lg)', padding: '2rem', maxWidth: '420px', width: '90%',
+                        boxShadow: '0 8px 40px rgba(0,0,0,0.4)', textAlign: 'center'
+                    }}>
+                        <i className="bi bi-exclamation-triangle" style={{ fontSize: '2.5rem', color: '#f59e0b', display: 'block', marginBottom: '1rem' }}></i>
+                        <h5 style={{ color: 'var(--ff-text)', fontWeight: 700, marginBottom: '0.5rem' }}>Submit Exam?</h5>
+                        <p style={{ color: 'var(--ff-text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                            Are you sure you want to submit? You cannot undo this action.
+                        </p>
+                        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+                            <button className="ff-btn ff-btn-outline" onClick={cancelSubmit} style={{ minWidth: '100px' }}>
+                                Cancel
+                            </button>
+                            <button className="ff-btn ff-btn-danger" onClick={confirmSubmit} style={{ minWidth: '100px' }}>
+                                <i className="bi bi-send me-1"></i> Submit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="row g-3">
                 {/* Main Content */}
                 <div className="col-md-9">
