@@ -31,6 +31,11 @@ router.get('/:id', requireAuth, async (req, res) => {
         const exam = await Exam.findById(req.params.id);
         if (!exam) return res.status(404).json({ message: 'Exam not found' });
 
+        // Students can only access published exams
+        if (req.user.role === 'Student' && !exam.published) {
+            return res.status(403).json({ message: 'This exam is not available' });
+        }
+
         // Strip correct answers if it's a student requesting
         if (req.user.role === 'Student') {
             const strippedExam = exam.toObject();

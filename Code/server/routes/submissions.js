@@ -1,39 +1,45 @@
 import express from 'express';
-import { exec } from 'child_process';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import axios from 'axios';
 import Submission from '../models/Submission.js';
 import { Exam } from '../models/Exam.js';
 import { requireAuth } from '../middleware/auth.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const tempDir = path.join(__dirname, '..', 'temp');
-if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-
-const SUPPORTED_LANGUAGES = {
-    javascript: { ext: '.js', cmd: (fp) => `node "${fp}"` },
-    python: { ext: '.py', cmd: (fp) => `python "${fp}"` }
+// Judge0 CE — same as compile route
+const JUDGE0_URL = 'https://ce.judge0.com';
+const LANGUAGE_MAP = {
+    javascript: 63,
+    python: 71,
+    c: 50,
+    cpp: 54,
+    java: 62,
 };
 
-// Helper: run code against a single test case
-function runTestCase(code, language, input, timeout = 10000) {
-    return new Promise((resolve) => {
-        const langConfig = SUPPORTED_LANGUAGES[language] || SUPPORTED_LANGUAGES.javascript;
-        const fileName = `grade_${Date.now()}_${Math.random().toString(36).substring(7)}${langConfig.ext}`;
-        const filePath = path.join(tempDir, fileName);
-
-        try { fs.writeFileSync(filePath, code); } catch (e) { return resolve({ output: '', error: 'File write failed' }); }
-
-        const child = exec(langConfig.cmd(filePath), { timeout }, (error, stdout, stderr) => {
-            try { if (fs.existsSync(filePath)) fs.unlinkSync(filePath); } catch (e) { }
-            if (error) return resolve({ output: '', error: stderr || error.message });
-            resolve({ output: stdout.trim(), error: null });
-        });
-
-        if (input) { child.stdin.write(input); child.stdin.end(); }
-    });
+// Helper: run code against a single test case via Judge0
+async function runTestCase(code, language, input, timeout = 30000) {
+    const languageId = LANGUAGE_MAP[language] || LANGUAGE_MAP.javascript;
+    try {
+        const response = await axios.post(
+            `${JUDGE0_URL}/submissions?base64_encoded=true&wait=true`,
+            {
+                source_code: Buffer.from(code).toString('base64'),
+                language_id: languageId,
+                stdin: Buffer.from(input || '').toString('base64'),
+                cpu_time_limit: 5,
+                memory_limit: 128000
+            },
+            {
+                headers: { 'Content-Type': 'application/json' },
+                timeout
+            }
+        );
+        const result = response.data;
+        const stdout = result.stdout ? Buffer.from(result.stdout, 'base64').toString() : '';
+        const stderr = result.stderr ? Buffer.from(result.stderr, 'base64').toString() : '';
+        const isError = result.status && result.status.id > 3;
+        return { output: stdout.trim(), error: isError ? (stderr || 'Execution error') : null };
+    } catch (err) {
+        return { output: '', error: err.message };
+    }
 }
 
 const router = express.Router();

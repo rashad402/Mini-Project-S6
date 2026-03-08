@@ -21,7 +21,7 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/login_demo
 
 // Middleware
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: process.env.CLIENT_URL || true,
     credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -39,7 +39,7 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        sameSite: 'lax'
     }
 }));
 

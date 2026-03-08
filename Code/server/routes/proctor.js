@@ -8,6 +8,9 @@ const router = express.Router();
 router.post('/flag', requireAuth, async (req, res) => {
     try {
         const { examId, flagType, details } = req.body;
+        if (!examId || !flagType) {
+            return res.status(400).json({ message: 'examId and flagType are required' });
+        }
 
         const log = new ProctorLog({
             student: req.user._id,
