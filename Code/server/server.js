@@ -105,10 +105,25 @@ app.use('/api/compile', compileRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/students', studentRoutes);
 
-// Root Route
-app.get('/', (req, res) => {
-    res.send('Backend API is running.');
-});
+// Serve React frontend in production
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+if (process.env.NODE_ENV === 'production') {
+    const clientBuildPath = path.join(__dirname, '..', 'my-react-app', 'dist');
+    app.use(express.static(clientBuildPath));
+
+    // SPA catch-all: any non-API route serves index.html
+    app.get(/^(?!\/api).*/, (req, res) => {
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.send('Backend API is running.');
+    });
+}
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
