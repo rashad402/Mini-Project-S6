@@ -12,6 +12,7 @@ export default function CreateExam() {
     const [published, setPublished] = useState(false);
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(isEditMode);
+    const [csvMsg, setCsvMsg] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -54,6 +55,77 @@ export default function CreateExam() {
             testCases: [{ input: '', expectedOutput: '' }],
             points: 5
         }]);
+    };
+
+    const handleCSVImport = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        e.target.value = ''; // reset so same file can be re-uploaded
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const text = event.target.result;
+            const lines = text.split(/\r?\n/).filter(line => line.trim());
+
+            // Skip header if first row looks like a header
+            let startIndex = 0;
+            const firstLine = lines[0].toLowerCase();
+            if (firstLine.includes('question') || firstLine.includes('option')) {
+                startIndex = 1;
+            }
+
+            const imported = [];
+            const errors = [];
+
+            for (let i = startIndex; i < lines.length; i++) {
+                // Parse CSV row (handles quoted fields with commas)
+                const cols = [];
+                let current = '';
+                let inQuotes = false;
+                for (const ch of lines[i]) {
+                    if (ch === '"') { inQuotes = !inQuotes; }
+                    else if (ch === ',' && !inQuotes) { cols.push(current.trim()); current = ''; }
+                    else { current += ch; }
+                }
+                cols.push(current.trim());
+
+                if (cols.length < 6) {
+                    errors.push(`Row ${i + 1}: needs 6 columns (question, 4 options, answer), found ${cols.length}`);
+                    continue;
+                }
+
+                const [questionText, optA, optB, optC, optD, correctRaw] = cols;
+                if (!questionText) { errors.push(`Row ${i + 1}: empty question`); continue; }
+
+                // Parse correct answer: accept A/B/C/D or 1/2/3/4 or 0/1/2/3
+                let correctIndex = '0';
+                const ans = correctRaw.toUpperCase().trim();
+                if (['A', '1'].includes(ans)) correctIndex = '0';
+                else if (['B', '2'].includes(ans)) correctIndex = '1';
+                else if (['C', '3'].includes(ans)) correctIndex = '2';
+                else if (['D', '4'].includes(ans)) correctIndex = '3';
+                else if (['0', '1', '2', '3'].includes(ans)) correctIndex = ans;
+                else { errors.push(`Row ${i + 1}: invalid answer "${correctRaw}" — use A/B/C/D`); continue; }
+
+                imported.push({
+                    type: 'MCQ',
+                    text: questionText,
+                    image: '',
+                    options: [optA, optB, optC, optD],
+                    correctAnswer: correctIndex,
+                    points: 1
+                });
+            }
+
+            if (imported.length > 0) {
+                setQuestions(prev => [...prev, ...imported]);
+                setCsvMsg(`✅ Imported ${imported.length} question${imported.length > 1 ? 's' : ''} from CSV${errors.length > 0 ? ` (${errors.length} row${errors.length > 1 ? 's' : ''} skipped)` : ''}`);
+            } else {
+                setCsvMsg(`❌ No valid questions found. ${errors[0] || 'Check CSV format.'}`);
+            }
+            setTimeout(() => setCsvMsg(''), 6000);
+        };
+        reader.readAsText(file);
     };
 
     const updateQuestion = (index, field, value) => {
@@ -271,13 +343,39 @@ export default function CreateExam() {
                         </div>
                     ))}
 
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', padding: '1.5rem', border: '1px dashed var(--ff-border)', borderRadius: 'var(--ff-radius)', background: 'var(--ff-bg-card)' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', padding: '1.5rem', border: '1px dashed var(--ff-border)', borderRadius: 'var(--ff-radius)', background: 'var(--ff-bg-card)' }}>
                         <button type="button" className="ff-btn ff-btn-outline" onClick={addMCQ}>
                             <i className="bi bi-check2-square me-1"></i> Add MCQ
                         </button>
                         <button type="button" className="ff-btn ff-btn-outline" onClick={addCoding}>
                             <i className="bi bi-code-square me-1"></i> Add Coding
                         </button>
+                        <label
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                                padding: '0.5rem 1.2rem', borderRadius: 'var(--ff-radius-sm)',
+                                border: '1px solid var(--ff-accent)', color: 'var(--ff-accent-light)',
+                                background: 'rgba(168, 85, 247, 0.08)', cursor: 'pointer',
+                                fontWeight: 600, fontSize: '0.88rem', transition: 'background 0.2s'
+                            }}
+                        >
+                            <i className="bi bi-filetype-csv"></i> Import CSV
+                            <input type="file" accept=".csv" style={{ display: 'none' }} onChange={handleCSVImport} />
+                        </label>
+                    </div>
+                    {csvMsg && (
+                        <div style={{
+                            marginTop: '0.75rem', padding: '0.65rem 1rem', borderRadius: 'var(--ff-radius-sm)',
+                            background: csvMsg.startsWith('✅') ? 'rgba(52, 211, 153, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            border: `1px solid ${csvMsg.startsWith('✅') ? 'var(--ff-success)' : 'var(--ff-danger)'}`,
+                            fontSize: '0.85rem', color: csvMsg.startsWith('✅') ? 'var(--ff-success)' : 'var(--ff-danger)',
+                            textAlign: 'center'
+                        }}>
+                            {csvMsg}
+                        </div>
+                    )}
+                    <div style={{ marginTop: '0.5rem', textAlign: 'center', fontSize: '0.75rem', color: 'var(--ff-text-muted)' }}>
+                        CSV format: Question, Option A, Option B, Option C, Option D, Correct Answer (A/B/C/D)
                     </div>
                 </div>
 

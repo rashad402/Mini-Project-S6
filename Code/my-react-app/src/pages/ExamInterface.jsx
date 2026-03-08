@@ -228,18 +228,23 @@ export default function ExamInterface({ user }) {
         };
 
         if (exam) {
-            // IMPORTANT: Request camera FIRST (before fullscreen)
-            // so the permission dialog doesn't exit fullscreen
             const setupExam = async () => {
-                await initProctoring();
-
-                // Only enter fullscreen AFTER camera permission is granted
+                // Request fullscreen FIRST — it needs a recent user gesture
+                // (the click that navigated here counts, but expires if we await camera)
                 const el = document.documentElement;
                 if (el.requestFullscreen) {
-                    el.requestFullscreen().catch(() => {
-                        console.warn('Fullscreen request denied — skipping enforcement');
-                    });
+                    try {
+                        await el.requestFullscreen();
+                    } catch (err) {
+                        console.warn('Fullscreen request denied:', err);
+                    }
                 }
+
+                // Small delay so fullscreen transition finishes before camera dialog
+                await new Promise(r => setTimeout(r, 500));
+
+                // THEN request camera permission (dialog won't exit fullscreen on most browsers)
+                await initProctoring();
             };
             setupExam();
 
