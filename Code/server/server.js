@@ -55,45 +55,30 @@ mongoose.connect(MONGO_URI)
     })
     .catch(err => console.error('Could not connect to MongoDB:', err));
 
-// Seed Initial User
+// Seed Initial Users (creates or resets password to ensure login works)
 async function seedUser() {
-    try {
-        const existingUser = await User.findOne({ email: 'admin@example.com' });
-        if (!existingUser) {
-            const newUser = new User({
-                email: 'admin@example.com',
-                password: 'password123',
-                role: 'Admin'
-            });
-            await newUser.save();
-            console.log('Default user created: admin@example.com / password123');
-        } else {
-            console.log('Default user already exists.');
-        }
+    const defaults = [
+        { email: 'admin@example.com', password: 'password123', role: 'Admin' },
+        { email: 'student@example.com', password: 'password123', role: 'Student' },
+        { email: 'instructor@example.com', password: 'password123', role: 'Instructor' }
+    ];
 
-        const existingStudent = await User.findOne({ email: 'student@example.com' });
-        if (!existingStudent) {
-            const newStudent = new User({
-                email: 'student@example.com',
-                password: 'password123',
-                role: 'Student'
-            });
-            await newStudent.save();
-            console.log('Default student created: student@example.com / password123');
+    for (const { email, password, role } of defaults) {
+        try {
+            let user = await User.findOne({ email });
+            if (!user) {
+                user = new User({ email, password, role });
+                await user.save();
+                console.log(`Default ${role.toLowerCase()} created: ${email}`);
+            } else {
+                // Reset password to ensure it works
+                user.password = password;
+                await user.save();
+                console.log(`Default ${role.toLowerCase()} password reset: ${email}`);
+            }
+        } catch (error) {
+            console.error(`Error seeding ${email}:`, error);
         }
-
-        const existingInstructor = await User.findOne({ email: 'instructor@example.com' });
-        if (!existingInstructor) {
-            const newInstructor = new User({
-                email: 'instructor@example.com',
-                password: 'password123',
-                role: 'Instructor'
-            });
-            await newInstructor.save();
-            console.log('Default instructor created: instructor@example.com / password123');
-        }
-    } catch (error) {
-        console.error('Error seeding users:', error);
     }
 }
 
