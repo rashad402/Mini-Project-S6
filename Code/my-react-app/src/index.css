@@ -885,3 +885,118 @@ h6 {
     transform: rotate(360deg);
   }
 }
+
+/* Slide-down animation for mobile menu */
+@keyframes ffSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sign-in split card layout */
+.ff-signin-card-split {
+  display: flex;
+  flex-direction: row;
+}
+
+.ff-signin-logo-side {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 2rem;
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(34, 211, 238, 0.04) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.ff-signin-logo-box {
+  width: 180px;
+  height: 180px;
+  border-radius: 24px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 40px rgba(99, 102, 241, 0.2), 0 0 60px rgba(99, 102, 241, 0.05);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.ff-signin-logo-box img {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+}
+
+/* Override browser autofill white background */
+.ff-signin-card-split input:-webkit-autofill,
+.ff-signin-card-split input:-webkit-autofill:hover,
+.ff-signin-card-split input:-webkit-autofill:focus,
+.ff-signin-card-split input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #111318 inset !important;
+  -webkit-text-fill-color: #f1f5f9 !important;
+  caret-color: #f1f5f9;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.ff-signin-card-split input {
+  background-color: transparent !important;
+  color: #f1f5f9 !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 767.98px) {
+  .ff-signin-bg {
+    padding: 1rem !important;
+  }
+
+  /* Sign-in card stacks vertically */
+  .ff-signin-card-split {
+    flex-direction: column;
+  }
+
+  .ff-signin-logo-side {
+    flex: none;
+    padding: 1.5rem 1rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .ff-signin-logo-box {
+    width: 100px;
+    height: 100px;
+    border-radius: 16px;
+    margin-bottom: 0.75rem;
+  }
+
+  .ff-signin-logo-box img {
+    width: 80px;
+    height: 80px;
+  }
+
+  .container,
+  .container-fluid {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .ff-navbar .navbar-brand {
+    font-size: 1.1rem !important;
+  }
+
+  .ff-stat-card .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .ff-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

@@ -13,7 +13,7 @@ export default function SignIn({ onLogin }) {
   const [forgotError, setForgotError] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
   const [resetRequestId, setResetRequestId] = useState(null);
-  const [resetStatus, setResetStatus] = useState(null); // 'pending' | 'approved' | 'rejected'
+  const [resetStatus, setResetStatus] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,18 +21,10 @@ export default function SignIn({ onLogin }) {
     setError('');
     setIsLoading(true);
     try {
-      const response = await api.post('/api/auth/login', {
-        email,
-        password,
-      });
-
+      const response = await api.post('/api/auth/login', { email, password });
       if (response.data.user) {
         onLogin(response.data.user);
-        if (response.data.user.role === 'Instructor') {
-          navigate('/instructor-dashboard');
-        } else {
-          navigate('/student-dashboard');
-        }
+        navigate(response.data.user.role === 'Instructor' ? '/instructor-dashboard' : '/student-dashboard');
       }
     } catch (err) {
       console.error('Login failed:', err);
@@ -58,10 +50,9 @@ export default function SignIn({ onLogin }) {
     }
   };
 
-  // Poll for reset request status every 5 seconds
+
   useEffect(() => {
     if (!resetRequestId || resetStatus !== 'pending') return;
-
     const interval = setInterval(async () => {
       try {
         const res = await api.get(`/api/auth/reset-status/${resetRequestId}`);
@@ -75,17 +66,43 @@ export default function SignIn({ onLogin }) {
           setForgotMsg('');
           clearInterval(interval);
         }
-      } catch (err) {
-        // Ignore polling errors
-      }
+      } catch (err) { /* ignore */ }
     }, 5000);
-
     return () => clearInterval(interval);
   }, [resetRequestId, resetStatus]);
 
+  // Underline input styles
+  const inputGroupStyle = { marginBottom: '1.25rem' };
+  const labelStyle = {
+    display: 'block', fontSize: '0.72rem', fontWeight: 600,
+    textTransform: 'uppercase', letterSpacing: '0.08em',
+    color: '#64748b', marginBottom: '0.35rem',
+  };
+  const inputStyle = {
+    width: '100%', background: 'transparent', border: 'none',
+    borderBottom: '1.5px solid #334155', padding: '0.6rem 0',
+    fontSize: '0.95rem', color: '#f1f5f9', outline: 'none',
+    transition: 'border-color 0.3s', fontWeight: 500,
+  };
+  const alertStyle = {
+    padding: '0.6rem 0.85rem', borderRadius: '8px',
+    background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
+    color: '#f87171', fontSize: '0.82rem', marginBottom: '1rem',
+  };
+  const successStyle = {
+    padding: '0.6rem 0.85rem', borderRadius: '8px',
+    background: 'rgba(52,211,153,0.1)', border: '1px solid #34d399',
+    color: '#34d399', fontSize: '0.82rem', marginBottom: '1rem',
+  };
+  const pendingStyle = {
+    padding: '0.6rem 0.85rem', borderRadius: '8px',
+    background: 'rgba(251,191,36,0.1)', border: '1px solid #fbbf24',
+    color: '#fbbf24', fontSize: '0.82rem', marginBottom: '1rem', textAlign: 'center',
+  };
+
   return (
     <div className="ff-signin-bg">
-      {/* Animated background elements */}
+      {/* Animated background — flying orbs */}
       <div className="ff-orb-3"></div>
       <div className="ff-particles">
         <div className="ff-particle"></div>
@@ -98,180 +115,196 @@ export default function SignIn({ onLogin }) {
         <div className="ff-particle"></div>
       </div>
 
-      <div className="ff-signin-card ff-animate-in">
-        <div className="ff-logo">Focus Flow</div>
-        <p style={{ textAlign: 'center', color: 'var(--ff-text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-          AI-Proctored Smart Exam Platform
-        </p>
+      {/* Main Card — split layout */}
+      <div className="ff-animate-in ff-signin-card-split" style={{
+        maxWidth: '820px', width: '100%',
+        background: 'rgba(15, 17, 23, 0.92)', backdropFilter: 'blur(24px)',
+        borderRadius: '16px', overflow: 'hidden',
+        boxShadow: '0 25px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.1)',
+        border: '1px solid rgba(99,102,241,0.08)',
+      }}>
 
-        {!showForgot ? (
-          <>
-            {error && <div className="ff-alert mb-3"><i className="bi bi-exclamation-triangle me-2"></i>{error}</div>}
+        {/* Left — Logo Side */}
+        <div className="ff-signin-logo-side">
+          <div className="ff-signin-logo-box">
+            <img src="/focusflow-logo.jpg" alt="Focus Flow" />
+          </div>
+          <div style={{
+            fontSize: '0.72rem', color: '#475569', textAlign: 'center',
+            lineHeight: 1.4, fontWeight: 500,
+          }}>
+            <span style={{ color: '#94a3b8', fontWeight: 600 }}>Powered by</span> MediaPipe AI
+          </div>
+        </div>
 
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '1.15rem' }}>
-                <label className="ff-label" htmlFor="email">Email Address</label>
-                <input
-                  id="email"
-                  type="email"
-                  className="ff-input"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
+        {/* Right — Form Side */}
+        <div style={{
+          flex: 1, padding: '2.5rem',
+          display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        }}>
+
+          {!showForgot ? (
+            <>
+              <div style={{ marginBottom: '1.75rem' }}>
+                <h2 style={{
+                  fontSize: '1.6rem', fontWeight: 800, color: '#f1f5f9',
+                  letterSpacing: '-0.02em', marginBottom: '0.25rem',
+                }}>
+                  Sign In to <span style={{ color: '#818cf8' }}>Focus Flow</span>
+                </h2>
+                <p style={{ color: '#64748b', fontSize: '0.88rem', margin: 0 }}>
+                  AI-Proctored Smart Exam Platform
+                </p>
               </div>
-              <div style={{ marginBottom: '0.5rem' }}>
-                <label className="ff-label" htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  className="ff-input"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <div style={{ textAlign: 'right', marginBottom: '1.25rem' }}>
-                <button
-                  type="button"
-                  onClick={() => { setShowForgot(true); setError(''); }}
-                  style={{ background: 'none', border: 'none', color: 'var(--ff-primary-light)', fontSize: '0.82rem', cursor: 'pointer', padding: 0 }}
-                >
-                  Forgot Password?
-                </button>
-              </div>
-              <button type="submit" className="ff-btn ff-btn-primary w-100" disabled={isLoading} style={{ padding: '0.7rem', fontSize: '1rem' }}>
-                {isLoading ? (
-                  <><span className="spinner-border spinner-border-sm me-2"></span> Signing in...</>
-                ) : (
-                  <><i className="bi bi-box-arrow-in-right me-1"></i> Sign In</>
-                )}
-              </button>
-            </form>
 
-            <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <button
-                type="button"
-                className="ff-btn ff-btn-secondary w-100"
-                onClick={async () => {
-                  setEmail('instructor@example.com');
-                  setPassword('password123');
-                  setError('');
-                  setIsLoading(true);
-                  try {
-                    const response = await api.post('/api/auth/login', {
-                      email: 'instructor@example.com',
-                      password: 'password123',
-                    });
-                    if (response.data.user) {
-                      onLogin(response.data.user);
-                      if (response.data.user.role === 'Instructor') {
-                        navigate('/instructor-dashboard');
-                      } else {
-                        navigate('/student-dashboard');
-                      }
-                    }
-                  } catch (err) {
-                    setError(err.response?.data?.message || 'Login failed.');
-                  } finally {
-                    setIsLoading(false);
-                  }
-                }}
-                style={{
-                  background: 'rgba(99, 102, 241, 0.1)',
-                  border: '1px solid rgba(99, 102, 241, 0.3)',
-                  padding: '0.6rem',
-                  fontSize: '0.9rem',
-                  color: 'var(--ff-primary-light)'
-                }}
-              >
-                <i className="bi bi-lightning-charge-fill me-2"></i>
-                1-Click Login: Demo Instructor
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Forgot Password View */}
-            <div style={{ marginBottom: '1rem' }}>
-              <button
-                type="button"
-                onClick={() => { setShowForgot(false); setForgotMsg(''); setForgotError(''); setResetStatus(null); }}
-                style={{ background: 'none', border: 'none', color: 'var(--ff-text-muted)', fontSize: '0.85rem', cursor: 'pointer', padding: 0 }}
-              >
-                <i className="bi bi-arrow-left me-1"></i> Back to Sign In
-              </button>
-            </div>
+              {error && (
+                <div style={alertStyle}>
+                  <i className="bi bi-exclamation-triangle me-2"></i>{error}
+                </div>
+              )}
 
-            <div style={{ background: 'var(--ff-bg-elevated)', borderRadius: 'var(--ff-radius-sm)', padding: '0.85rem 1rem', marginBottom: '1.25rem' }}>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--ff-text-secondary)' }}>
-                <i className="bi bi-info-circle me-2" style={{ color: 'var(--ff-primary-light)' }}></i>
-                Enter your email below. A password reset request will be sent to your instructor for approval.
-              </p>
-            </div>
-
-            {forgotMsg && (
-              <div style={{ padding: '0.75rem 1rem', borderRadius: 'var(--ff-radius-sm)', background: 'rgba(52, 211, 153, 0.1)', border: '1px solid var(--ff-success)', marginBottom: '1rem', fontSize: '0.85rem', color: 'var(--ff-success)' }}>
-                <i className="bi bi-check-circle me-2"></i>{forgotMsg}
-              </div>
-            )}
-
-            {forgotError && (
-              <div className="ff-alert mb-3">
-                <i className="bi bi-exclamation-triangle me-2"></i>{forgotError}
-              </div>
-            )}
-
-            {resetStatus === 'pending' && (
-              <div style={{ padding: '0.75rem 1rem', borderRadius: 'var(--ff-radius-sm)', background: 'rgba(251, 191, 36, 0.1)', border: '1px solid var(--ff-warning)', marginBottom: '1rem', fontSize: '0.85rem', color: 'var(--ff-warning)', textAlign: 'center' }}>
-                <span className="spinner-border spinner-border-sm me-2"></span>
-                Waiting for instructor approval...
-              </div>
-            )}
-
-            {resetStatus !== 'approved' && (
-              <form onSubmit={handleForgotPassword}>
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <label className="ff-label" htmlFor="forgotEmail">Your Email</label>
+              <form onSubmit={handleSubmit}>
+                <div style={inputGroupStyle}>
+                  <label style={labelStyle} htmlFor="email">Your email</label>
                   <input
-                    id="forgotEmail"
-                    type="email"
-                    className="ff-input"
-                    placeholder="student@example.com"
-                    value={forgotEmail}
-                    onChange={(e) => setForgotEmail(e.target.value)}
+                    id="email" type="email" style={inputStyle}
+                    placeholder="name@example.com"
+                    value={email} onChange={(e) => setEmail(e.target.value)}
+                    onFocus={(e) => e.target.style.borderBottomColor = '#818cf8'}
+                    onBlur={(e) => e.target.style.borderBottomColor = '#334155'}
                     required
-                    disabled={resetStatus === 'pending'}
                   />
                 </div>
-                <button
-                  type="submit"
-                  className="ff-btn ff-btn-accent w-100"
-                  disabled={forgotLoading || resetStatus === 'pending'}
-                  style={{ padding: '0.7rem', fontSize: '1rem' }}
-                >
-                  {forgotLoading ? (
-                    <><span className="spinner-border spinner-border-sm me-2"></span> Sending...</>
-                  ) : (
-                    <><i className="bi bi-send me-1"></i> Send Reset Request</>
-                  )}
+                <div style={inputGroupStyle}>
+                  <label style={labelStyle} htmlFor="password">Your password</label>
+                  <input
+                    id="password" type="password" style={inputStyle}
+                    placeholder="••••••••"
+                    value={password} onChange={(e) => setPassword(e.target.value)}
+                    onFocus={(e) => e.target.style.borderBottomColor = '#818cf8'}
+                    onBlur={(e) => e.target.style.borderBottomColor = '#334155'}
+                    required
+                  />
+                </div>
+
+                <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+                  <button type="button"
+                    onClick={() => { setShowForgot(true); setError(''); }}
+                    style={{
+                      background: 'none', border: 'none', color: '#818cf8',
+                      fontSize: '0.8rem', cursor: 'pointer', padding: 0, fontWeight: 500,
+                    }}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+
+                <button type="submit" disabled={isLoading} style={{
+                  width: '100%', padding: '0.75rem', borderRadius: '8px', border: 'none',
+                  background: 'linear-gradient(135deg, #6366f1, #818cf8)', color: '#fff',
+                  fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em',
+                  cursor: 'pointer', textTransform: 'uppercase',
+                  boxShadow: '0 4px 20px rgba(99,102,241,0.3)',
+                  transition: 'all 0.3s', marginTop: '0.5rem',
+                }}>
+                  {isLoading ? (
+                    <><span className="spinner-border spinner-border-sm me-2"></span> Signing in...</>
+                  ) : 'SIGN IN'}
                 </button>
               </form>
-            )}
 
-            {resetStatus === 'approved' && (
-              <button
-                className="ff-btn ff-btn-primary w-100"
-                onClick={() => { setShowForgot(false); setResetStatus(null); setForgotMsg(''); }}
-                style={{ padding: '0.7rem', fontSize: '1rem' }}
-              >
-                <i className="bi bi-box-arrow-in-right me-1"></i> Go to Sign In
-              </button>
-            )}
-          </>
-        )}
+            </>
+
+          ) : (
+            <>
+              {/* Forgot Password View */}
+              <div style={{ marginBottom: '1rem' }}>
+                <button type="button"
+                  onClick={() => { setShowForgot(false); setForgotMsg(''); setForgotError(''); setResetStatus(null); }}
+                  style={{
+                    background: 'none', border: 'none', color: '#64748b',
+                    fontSize: '0.85rem', cursor: 'pointer', padding: 0, fontWeight: 500,
+                  }}
+                >
+                  <i className="bi bi-arrow-left me-1"></i> Back to Sign In
+                </button>
+              </div>
+
+              <div style={{ marginBottom: '1.5rem' }}>
+                <h2 style={{
+                  fontSize: '1.4rem', fontWeight: 800, color: '#f1f5f9',
+                  letterSpacing: '-0.02em', marginBottom: '0.25rem',
+                }}>
+                  Reset <span style={{ color: '#818cf8' }}>Password</span>
+                </h2>
+                <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
+                  <i className="bi bi-info-circle me-1"></i>
+                  A reset request will be sent to your instructor for approval.
+                </p>
+              </div>
+
+              {forgotMsg && <div style={successStyle}><i className="bi bi-check-circle me-2"></i>{forgotMsg}</div>}
+              {forgotError && <div style={alertStyle}><i className="bi bi-exclamation-triangle me-2"></i>{forgotError}</div>}
+
+              {resetStatus === 'pending' && (
+                <div style={pendingStyle}>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Waiting for instructor approval...
+                </div>
+              )}
+
+              {resetStatus !== 'approved' && (
+                <form onSubmit={handleForgotPassword}>
+                  <div style={inputGroupStyle}>
+                    <label style={labelStyle} htmlFor="forgotEmail">Your Email</label>
+                    <input
+                      id="forgotEmail" type="email" style={inputStyle}
+                      placeholder="student@example.com"
+                      value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)}
+                      onFocus={(e) => e.target.style.borderBottomColor = '#818cf8'}
+                      onBlur={(e) => e.target.style.borderBottomColor = '#334155'}
+                      required disabled={resetStatus === 'pending'}
+                    />
+                  </div>
+                  <button type="submit" disabled={forgotLoading || resetStatus === 'pending'} style={{
+                    width: '100%', padding: '0.75rem', borderRadius: '8px', border: 'none',
+                    background: 'linear-gradient(135deg, #6366f1, #818cf8)', color: '#fff',
+                    fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em',
+                    cursor: 'pointer', textTransform: 'uppercase',
+                    boxShadow: '0 4px 20px rgba(99,102,241,0.3)', transition: 'all 0.3s',
+                  }}>
+                    {forgotLoading ? (
+                      <><span className="spinner-border spinner-border-sm me-2"></span> Sending...</>
+                    ) : (
+                      <><i className="bi bi-send me-1"></i> SEND RESET REQUEST</>
+                    )}
+                  </button>
+                </form>
+              )}
+
+              {resetStatus === 'approved' && (
+                <button style={{
+                  width: '100%', padding: '0.75rem', borderRadius: '8px', border: 'none',
+                  background: 'linear-gradient(135deg, #6366f1, #818cf8)', color: '#fff',
+                  fontSize: '0.95rem', fontWeight: 700, letterSpacing: '0.04em',
+                  cursor: 'pointer', textTransform: 'uppercase',
+                  boxShadow: '0 4px 20px rgba(99,102,241,0.3)', transition: 'all 0.3s',
+                }}
+                  onClick={() => { setShowForgot(false); setResetStatus(null); setForgotMsg(''); }}
+                >
+                  <i className="bi bi-box-arrow-in-right me-1"></i> GO TO SIGN IN
+                </button>
+              )}
+            </>
+          )}
+
+          <p style={{
+            textAlign: 'center', color: '#475569', fontSize: '0.75rem',
+            marginTop: '1.5rem', marginBottom: 0,
+          }}>
+            By signing in, you agree to Focus Flow's proctoring policies.
+          </p>
+        </div>
       </div>
     </div>
   );
